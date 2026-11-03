@@ -9,6 +9,9 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 
+/**
+ * .imports 外部文件自动配置类
+ */
 public class ImportCandidates {
     //路径模板
     private static final String LOCATION = "META-INF/spring/%s.imports";
@@ -21,6 +24,10 @@ public class ImportCandidates {
         this.candidates=List.copyOf(candidates);
     }
 
+    /**
+     * 获取自动配置类的候选名单
+     * @return 返回快照
+     */
     public List<String> getCandidates(){
         return this.candidates;
     }
@@ -54,6 +61,9 @@ public class ImportCandidates {
 
     }
 
+    /**
+     * 用IO流读取文件字符串，跳过#注释
+     */
     private static List<String> readCandidateConfiguration(URL url){
         try(BufferedReader reader = new BufferedReader(
                 new InputStreamReader(url.openStream(), StandardCharsets.UTF_8))){
@@ -77,7 +87,7 @@ public class ImportCandidates {
     }
 
     /**
-     * 去除注释
+     * 截取、去除注释
      * @param line
      * @return
      */

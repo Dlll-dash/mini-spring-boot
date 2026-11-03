@@ -12,4 +12,13 @@ public @interface ComponentScan {
 
     String[] value() default {};
 
+    Filter[] excludeFilters() default {};
+
+    @interface Filter {
+        FilterType type() default FilterType.ANNOTATION;
+
+        Class<?>[] classes() default {};
+    }
+
+
 }

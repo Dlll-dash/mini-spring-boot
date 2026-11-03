@@ -28,18 +28,22 @@ public class ConfigurationClassProcessor implements BeanFactoryPostProcessor{
             //getBeanDefinitionNames()每次循环获取最新的快照，不能放在循环外
             String name=registry.getBeanDefinitionNames()[i];
             BeanDefinition bd=registry.getBeanDefinition(name);
-            ComponentScan componentScan=bd.getBeanType().getAnnotation(ComponentScan.class);
+            ComponentScan componentScan=AnnotationUtils.findAnnotation(bd.getBeanType(),ComponentScan.class);
             Set<Class<?>> imports=new LinkedHashSet<>();
 
             if(componentScan!=null){
+                List<TypeFilter>filters=new ArrayList<>();
+                for(ComponentScan.Filter filter : componentScan.excludeFilters()){
+                    filters.addAll(getTypeFilter(filter.type(), filter.classes()));
+                }
                 String[] basePackages=componentScan.value();
                 if(basePackages.length==0){
                     //默认配置类所在包
-                    scan(registry,bd.getBeanType().getPackageName());
+                    scan(registry,bd.getBeanType().getPackageName(),filters);
                 }else{
                     //扫描注解标明的所有包
                     for(String basePackage:basePackages){
-                        scan(registry,basePackage);
+                        scan(registry,basePackage,filters);
                     }
                 }
             }
@@ -71,8 +75,9 @@ public class ConfigurationClassProcessor implements BeanFactoryPostProcessor{
     /**
      * 扫包
      * @param basePackage 根扫描包
+     * @param filters 过滤器
      */
-    private void scan(BeanDefinitionRegistry registry,String basePackage){
+    private void scan(BeanDefinitionRegistry registry,String basePackage,List<TypeFilter> filters){
         String path=basePackage.replace('.','/');
         try {
             Enumeration<URL> urls = Thread.currentThread().getContextClassLoader().getResources(path);
@@ -84,7 +89,7 @@ public class ConfigurationClassProcessor implements BeanFactoryPostProcessor{
                 if(!url.getProtocol().equals("file"))continue;
                 try {
                     //递归处理
-                    walk(registry,new File(url.toURI()), basePackage);
+                    walk(registry,new File(url.toURI()), basePackage,filters);
                 } catch (ClassNotFoundException e) {
                     throw new RuntimeException(e);
                 } catch (URISyntaxException e){
@@ -101,22 +106,28 @@ public class ConfigurationClassProcessor implements BeanFactoryPostProcessor{
      * 递归扫包
      * @param dir
      * @param packageName
+     * @param filters
      * @throws ClassNotFoundException
      */
-    private void walk(BeanDefinitionRegistry registry,File dir, String packageName) throws ClassNotFoundException {
+    private void walk(BeanDefinitionRegistry registry,File dir, String packageName,List<TypeFilter> filters) throws ClassNotFoundException {
         File[] files=dir.listFiles();
         if(files==null)return;
         Arrays.sort(files);
         for(File f : files){
             String newPackageName=packageName+"."+f.getName();
             if(f.isDirectory()){
-                walk(registry,f,newPackageName);
+                walk(registry,f,newPackageName,filters);
             }else if(f.getName().endsWith(".class")){
                 String className=newPackageName.replace(".class","");
                 //这里在扫描时就加载类，而spring不会在扫描时加载,spring只会加载注解元数据
                 //目前只是mini版，没有依赖，扫描时加载不会导致崩掉
                 Class<?> c=Class.forName(className);
-                if(c.isAnnotationPresent(Component.class)){
+
+                //检查是否被排除
+                if(isExcluded(c,filters)){
+                    continue;
+                }
+                if(AnnotationUtils.findAnnotation(c,Component.class)!=null){
                     if(c.isAnnotationPresent(Conditional.class)&&shouldSkip(c.getAnnotation(Conditional.class),c,registry)){
                         continue;
                     }
@@ -301,6 +312,63 @@ public class ConfigurationClassProcessor implements BeanFactoryPostProcessor{
         }
     }
 
+    /**
+     * 根据过滤器类型，将过滤器属性装入TypeFilter中，返回过滤器列表
+     * @param type
+     * @param filterAttributes
+     * @return
+     */
+    private List<TypeFilter> getTypeFilter(FilterType type,Class<?>[] filterAttributes){
+        List<TypeFilter> typeFilters = new ArrayList<>();
+        for(Class<?> filterClass : filterAttributes){
+            switch (type){
+                case ANNOTATION -> {
+                    if(!Annotation.class.isAssignableFrom(filterClass)){
+                        throw new IllegalArgumentException("@ComponentScan ANNOTATION type filter requires an annotation type");
+                    }
+                    Class<Annotation> annotationType = (Class<Annotation>) filterClass;
+                    typeFilters.add(new TypeFilter.AnnotationTypeFilter(annotationType));
+                }
+                case ASSIGNABLE_TYPE -> typeFilters.add(new TypeFilter.AssignableTypeFilter(filterClass));
+                case CUSTOM -> {
+                    if(!TypeFilter.class.isAssignableFrom(filterClass)){
+                        throw new IllegalArgumentException("@ComponentScan CUSTOM type filter requires a TypeFilter implementation");
+                    }
+                    try {
+                        TypeFilter typeFilter = (TypeFilter) filterClass.getDeclaredConstructor().newInstance();
+                        typeFilters.add(typeFilter);
+                    } catch (InstantiationException e) {
+                        throw new RuntimeException(e);
+                    } catch (IllegalAccessException e) {
+                        throw new RuntimeException(e);
+                    } catch (InvocationTargetException e) {
+                        throw new RuntimeException(e);
+                    } catch (NoSuchMethodException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+                //暂时不会到默认分支
+                default -> throw new IllegalArgumentException("Filter type not supported with Class value: " + type);
+            }
+        }
+        return typeFilters;
+
+    }
+
+    /**
+     * 判断是否被过滤
+     * @param cls
+     * @param filters
+     * @return
+     */
+    private boolean isExcluded(Class<?>cls,List<TypeFilter>filters){
+        for(TypeFilter filter : filters){
+            if(filter.match(cls)){
+                return true;
+            }
+        }
+        return false;
+    }
 }
 
 
