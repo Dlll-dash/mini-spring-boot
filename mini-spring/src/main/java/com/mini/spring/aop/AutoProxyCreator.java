@@ -155,6 +155,7 @@ public class AutoProxyCreator implements BeanPostProcessor, BeanFactoryAware {
         try{
             return method.invoke(bean,args);
         }catch(InvocationTargetException e){
+            //必须重抛，否则看不到报错信息
             Throwable cause = e.getTargetException();
             if(cause instanceof RuntimeException re)throw re;
             if (cause instanceof Error err) throw err;

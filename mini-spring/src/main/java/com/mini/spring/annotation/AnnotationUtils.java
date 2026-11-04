@@ -10,7 +10,7 @@ public class AnnotationUtils {
     private final static String SKIP_ANNOTATION_PREFIX="java.lang.";
 
     /**
-     * 外部调用入口
+     * 递归查找目标元注解
      * @param cls
      * @param target
      * @return
@@ -21,7 +21,7 @@ public class AnnotationUtils {
     }
 
     /**
-     * 递归查找目标元注解
+     * 递归查找目标元注解（对外部隐藏HashSet）
      * @param cls
      * @param target
      * @param visited

@@ -1,13 +1,10 @@
 package com.mini.spring.demo;
 
 import com.mini.spring.OnMissingBeanCondition;
-import com.mini.spring.annotation.Bean;
-import com.mini.spring.annotation.Component;
-import com.mini.spring.annotation.Conditional;
-import com.mini.spring.annotation.Import;
+import com.mini.spring.annotation.*;
 
 @Import(DemoSelector.class)
-@Component
+@Configuration
 public class ServiceConfig {
     @Bean
     @Conditional(TrueCondition.class)

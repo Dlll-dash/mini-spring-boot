@@ -21,14 +21,14 @@ public class BootDemo {
 
         System.out.println(">>> 服务已起，3 秒窗口，去 curl");
         try {
-            Thread.sleep(3000);
+            Thread.sleep(20000);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
         ctx.close();
         System.out.println(">>> 已 close");
         try (Socket s = new Socket("localhost", 8080)) {
-            System.out.println(">>> 还在接客");
+            System.out.println(">>> waiting...");
         } catch (IOException e) {
             System.out.println(">>> 关掉了: " + e.getClass().getSimpleName());
         }

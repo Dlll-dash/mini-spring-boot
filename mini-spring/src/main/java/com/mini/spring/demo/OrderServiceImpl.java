@@ -1,11 +1,8 @@
 package com.mini.spring.demo;
 
-import com.mini.spring.annotation.Autowired;
-import com.mini.spring.annotation.Component;
-import com.mini.spring.annotation.PostConstruct;
-import com.mini.spring.annotation.Transactional;
+import com.mini.spring.annotation.*;
 
-@Component
+@Service
 public class OrderServiceImpl implements OrderService{
 
     @Autowired

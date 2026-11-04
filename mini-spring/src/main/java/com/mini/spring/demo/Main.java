@@ -4,10 +4,11 @@ import com.mini.spring.MiniContext;
 import com.mini.spring.annotation.ComponentScan;
 import com.mini.spring.annotation.Import;
 import com.mini.spring.config.TransactionConfig;
+import com.mini.spring.web.HandlerMapping;
 
 import java.util.Arrays;
 
-@Import(TransactionConfig.class)
+@Import({TransactionConfig.class, HandlerMapping.class})
 @ComponentScan({"com.mini.spring.exception","com.mini.spring.demo"})
 public class Main {
 
@@ -40,5 +41,9 @@ public class Main {
         System.out.println("builder=[" + ctx.getBean("builder") + "] greeting=[" + ctx.getBean("greeting") + "]");
 
         System.out.println(ctx.getBean(Greeter.class).greet());
+
+        HandlerMapping hm = ctx.getBean(HandlerMapping.class);
+        System.out.println(hm.getHandler("/hello"));
+        System.out.println(hm.getHandler("/nope"));
     }
 }

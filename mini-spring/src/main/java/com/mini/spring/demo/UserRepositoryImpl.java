@@ -2,8 +2,9 @@ package com.mini.spring.demo;
 
 import com.mini.spring.annotation.Autowired;
 import com.mini.spring.annotation.Component;
+import com.mini.spring.annotation.Repository;
 
-@Component
+@Repository
 public class UserRepositoryImpl implements UserRepository{
     @Autowired
     private OrderService orderService;
