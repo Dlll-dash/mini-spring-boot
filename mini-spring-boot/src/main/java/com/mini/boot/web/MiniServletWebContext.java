@@ -29,8 +29,9 @@ public class MiniServletWebContext extends MiniContext {
 
             getFactory().registerBeanDefinition(WEB_SERVER_START_STOP_NAME,
                     new BeanDefinition(WEB_SERVER_START_STOP_NAME, WebServerStartStopLifecycle.class,new Object[]{server}));
-            //暂时手写
+            //暂时手写注册
             getFactory().registerBeanDefinition("handlerMapping",new BeanDefinition("handlerMapping", HandlerMapping.class));
+            //匹配“/”前缀的请求，并调用DispathcerServlet的handle方法
             server.createContext("/",new DispatcherServlet(getFactory()));
         } catch (IOException e) {
             throw new RuntimeException(e);

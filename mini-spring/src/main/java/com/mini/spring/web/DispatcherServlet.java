@@ -17,21 +17,27 @@ public class DispatcherServlet implements HttpHandler {
     }
 
 
+    /**
+     * 负责接到请求后进行处理
+     * @param httpExchange
+     * @throws IOException
+     */
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
+        //获取请求路径
         String path = httpExchange.getRequestURI().getPath();
         if(handlerMapping==null){
             //懒加载
             handlerMapping = factory.getBean(HandlerMapping.class);
         }
+        //获取路径对应的方法 handler
         Handler handler = handlerMapping.getHandler(path);
         if(handler == null){
             String msg = "handler not found in path "+path;
-            httpExchange.sendResponseHeaders(404,msg.getBytes().length);
-            httpExchange.getResponseBody().write(msg.getBytes());
-            httpExchange.close();
+            WebUtils.write(httpExchange,404,msg);
             return;
         }
+        //执行路径对应的方法
         adapter.handle(handler,httpExchange);
     }
 }

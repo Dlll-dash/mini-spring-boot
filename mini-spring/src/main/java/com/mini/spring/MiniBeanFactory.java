@@ -32,6 +32,7 @@ public class MiniBeanFactory implements BeanDefinitionRegistry{
 
     private final List<StringValueResolver> embeddedValueResolvers = new ArrayList<>(4);
 
+
     @Override
     public void registerBeanDefinition(String beanName, BeanDefinition beanDefinition) {
         if(beanDefinitions.put(beanName, beanDefinition)==null) {
@@ -140,7 +141,7 @@ public class MiniBeanFactory implements BeanDefinitionRegistry{
                     Value annotation = f.getAnnotation(Value.class);
                     f.setAccessible(true);
                     String value = resolveEmbeddedValue(annotation.value());
-                    Object object = convertIfNecessary(value,f.getType());
+                    Object object = SimpleTypeConverter.convertIfNecessary(value,f.getType());
                     f.set(obj,object);
                 }
             }
@@ -333,16 +334,5 @@ public class MiniBeanFactory implements BeanDefinitionRegistry{
         beanPostProcessors.add(pp);
     }
 
-    private Object convertIfNecessary(String value,Class<?> requiredType){
-        if(requiredType==String.class){
-            return value;
-        }
-        if(!requiredType.isPrimitive()&&value.isEmpty()){
-            return null;
-        }
-        if(requiredType==Integer.class||requiredType==int.class){
-            return Integer.parseInt(value);
-        }
-        throw new IllegalStateException("unsupported type: "+requiredType.getName());
-    }
+
 }

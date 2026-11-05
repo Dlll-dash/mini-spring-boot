@@ -1,7 +1,7 @@
 package com.mini.spring.demo.controller;
 
 import com.mini.spring.annotation.Controller;
-import com.mini.spring.annotation.GetMapping;
+import com.mini.spring.web.annotation.GetMapping;
 
 @Controller
 public class HelloController {

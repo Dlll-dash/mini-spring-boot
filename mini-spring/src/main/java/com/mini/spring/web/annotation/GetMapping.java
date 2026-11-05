@@ -1,4 +1,4 @@
-package com.mini.spring.annotation;
+package com.mini.spring.web.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

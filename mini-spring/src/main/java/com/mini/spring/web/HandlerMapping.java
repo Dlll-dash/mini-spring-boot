@@ -3,7 +3,7 @@ package com.mini.spring.web;
 import com.mini.spring.BeanFactoryAware;
 import com.mini.spring.MiniBeanFactory;
 import com.mini.spring.annotation.AnnotationUtils;
-import com.mini.spring.annotation.RequestMapping;
+import com.mini.spring.web.annotation.RequestMapping;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
@@ -64,7 +64,6 @@ public class HandlerMapping implements BeanFactoryAware {
         try {
             return (String)requestMapping.annotationType()
                     .getDeclaredMethod("value").invoke(requestMapping);
-
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
         } catch (InvocationTargetException e) {

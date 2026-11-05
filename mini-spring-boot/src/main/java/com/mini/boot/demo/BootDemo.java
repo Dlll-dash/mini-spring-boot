@@ -21,7 +21,7 @@ public class BootDemo {
 
         System.out.println(">>> 服务已起，3 秒窗口，去 curl");
         try {
-            Thread.sleep(20000);
+            Thread.sleep(60000);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
