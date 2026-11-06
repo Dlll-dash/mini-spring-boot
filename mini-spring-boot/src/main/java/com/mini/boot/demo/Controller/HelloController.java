@@ -10,7 +10,7 @@ import com.mini.spring.web.annotation.RequestParam;
 public class HelloController {
 
     @GetMapping("/hello")
-    public String hello(@RequestParam("x") String x){
+    public String hello(@RequestParam String x){
         return "Hello mini SpringBoot from " + x;
     }
 
