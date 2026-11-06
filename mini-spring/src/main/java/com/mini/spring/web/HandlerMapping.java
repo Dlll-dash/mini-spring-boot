@@ -3,6 +3,7 @@ package com.mini.spring.web;
 import com.mini.spring.BeanFactoryAware;
 import com.mini.spring.MiniBeanFactory;
 import com.mini.spring.annotation.AnnotationUtils;
+import com.mini.spring.annotation.Controller;
 import com.mini.spring.web.annotation.RequestMapping;
 
 import java.lang.annotation.Annotation;
@@ -21,18 +22,19 @@ public class HandlerMapping implements BeanFactoryAware {
     public void setBeanFactory(MiniBeanFactory factory) {
         for(String beanName : factory.getBeanDefinitionNames()){
             Class<?> beanType = factory.getBeanDefinition(beanName).getBeanType();
-            //获取类级的前缀
-            String prefix=pathOf(mappingOf(beanType));
+            if(beanType!=null && isHandler(beanType)) {
+                //获取类级的前缀
+                String prefix = pathOf(mappingOf(beanType));
 
-            for(Method m : beanType.getDeclaredMethods()){
-                //拿到带RequestMapping的注解（@GetMapping,@PostMapping...）
-                Annotation requestMapping = mappingOf(m);
-                if(requestMapping != null){
-                    //加上前缀
-                    handlers.put(prefix+pathOf(requestMapping),new Handler(beanName,m));
+                for (Method m : beanType.getDeclaredMethods()) {
+                    //拿到带RequestMapping的注解（@GetMapping,@PostMapping...）
+                    Annotation requestMapping = mappingOf(m);
+                    if (requestMapping != null) {
+                        //加上前缀
+                        handlers.put(prefix + pathOf(requestMapping), new Handler(beanName, m));
+                    }
                 }
             }
-
         }
     }
 
@@ -76,5 +78,10 @@ public class HandlerMapping implements BeanFactoryAware {
     public Handler getHandler(String path){
         return handlers.get(path);
     }
+
+    private boolean isHandler(Class<?> type){
+        return AnnotationUtils.findAnnotation(type,Controller.class)!=null;
+    }
+
 
 }

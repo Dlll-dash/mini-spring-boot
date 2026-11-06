@@ -6,16 +6,30 @@ import com.mini.spring.web.exception.RequestParamException;
 import com.sun.net.httpserver.HttpExchange;
 
 import java.io.IOException;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.util.HashMap;
+import java.util.Map;
 
 public class HandlerAdapter {
 
     private final MiniBeanFactory factory;
 
+    private final Map<Class<? extends Annotation>,ArgumentResolver> resolvers = new HashMap<>(16);
+
+    private static final Map<Class<? extends Annotation>,Class<?>>argumentTypeMap = Map.of(
+            RequestParam.class,RequestParamArgumentResolver.class
+            );
+
     HandlerAdapter(MiniBeanFactory factory){
         this.factory=factory;
+        //初始化处理器
+        for(Map.Entry<Class<? extends Annotation>,Class<?>> entry : argumentTypeMap.entrySet()){
+            ArgumentResolver resolver = initiateResolver(entry.getValue());
+            resolvers.put(entry.getKey(),resolver);
+        }
     }
 
     /**
@@ -69,13 +83,35 @@ public class HandlerAdapter {
     }
 
     private Object resolveOne(HttpExchange exchange, Method method, Parameter parameter){
-        if(parameter.isAnnotationPresent(RequestParam.class)){
-            return new RequestParamResolver().resolve(exchange,parameter);
+        Annotation[] annotations = parameter.getAnnotations();
+        for(Annotation ann : annotations){
+            ArgumentResolver resolver = getResolver(ann.annotationType());
+            if(resolver!=null){
+                //多个可解析的注解，就只解析第一个。
+                return resolver.resolve(exchange,parameter);
+            }
         }
         throw new IllegalStateException("no resolver for parameter " + parameter.getName()
                 + " of type [" + parameter.getType().getName() + "] on method " + method);
     }
 
+    private ArgumentResolver getResolver(Class<? extends Annotation>type){
+        return resolvers.get(type);
+    }
+
+    private static ArgumentResolver initiateResolver(Class<?> cls){
+        try {
+            return (ArgumentResolver) cls.getDeclaredConstructor().newInstance();
+        } catch (InstantiationException e) {
+            throw new RuntimeException(e);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        } catch (InvocationTargetException e) {
+            throw new RuntimeException(e);
+        } catch (NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
 
 }

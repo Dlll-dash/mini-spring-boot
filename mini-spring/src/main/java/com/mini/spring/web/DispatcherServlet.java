@@ -33,7 +33,7 @@ public class DispatcherServlet implements HttpHandler {
         //获取路径对应的方法 handler
         Handler handler = handlerMapping.getHandler(path);
         if(handler == null){
-            String msg = "handler not found in path "+path;
+            String msg = "handler not found in path: "+path;
             WebUtils.write(httpExchange,404,msg);
             return;
         }

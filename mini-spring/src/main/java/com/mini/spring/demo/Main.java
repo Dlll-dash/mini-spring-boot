@@ -44,6 +44,6 @@ public class Main {
 
         HandlerMapping hm = ctx.getBean(HandlerMapping.class);
         System.out.println(hm.getHandler("/hello"));
-        System.out.println(hm.getHandler("/nope"));
+        System.out.println(hm.getHandler("/probe"));
     }
 }
