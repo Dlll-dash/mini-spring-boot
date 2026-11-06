@@ -1,6 +1,7 @@
 package com.mini.spring.web;
 
 import com.mini.spring.MiniBeanFactory;
+import com.mini.spring.web.exception.RequestMethodNotSupportedException;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
@@ -31,7 +32,14 @@ public class DispatcherServlet implements HttpHandler {
             handlerMapping = factory.getBean(HandlerMapping.class);
         }
         //获取路径对应的方法 handler
-        Handler handler = handlerMapping.getHandler(path);
+        String requestMethod = httpExchange.getRequestMethod();
+        Handler handler;
+        try {
+            handler = handlerMapping.getHandler(path, requestMethod);
+        }catch (RequestMethodNotSupportedException e){
+            WebUtils.write(httpExchange,e.getStatusCode(),e.getMessage());
+            return;
+        }
         if(handler == null){
             String msg = "handler not found in path: "+path;
             WebUtils.write(httpExchange,404,msg);

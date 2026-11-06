@@ -9,6 +9,11 @@ import java.lang.reflect.Parameter;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 
+/**
+ * 处理被 {@link RequestParam} 修饰的参数。
+ * <p>从URI中获取与注解中的参数名相同的{@code Query参数}。若注解中没有参数名
+ * 则默认使用方法中参数名称匹配。所以在编译时需要加入{@code -parameter}参数，否则参数名不会被编译进入字节码。</p>
+ */
 public class RequestParamArgumentResolver implements ArgumentResolver{
 
     @Override
@@ -62,8 +67,4 @@ public class RequestParamArgumentResolver implements ArgumentResolver{
         }
         throw new RequestParamException("Cannot find any query param ["+queryName+"]: "+exchange.getRequestURI());
     }
-
-
-
-
 }
