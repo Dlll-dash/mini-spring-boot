@@ -7,20 +7,23 @@ import com.mini.spring.annotation.Controller;
 import com.mini.spring.web.annotation.RequestMapping;
 import com.mini.spring.web.annotation.RequestMethod;
 import com.mini.spring.web.exception.RequestMethodNotSupportedException;
+import jakarta.servlet.http.HttpServletRequest;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 public class HandlerMapping implements BeanFactoryAware {
 
+    public static final String URI_TEMPLATE_VARIABLES_ATTRIBUTE =
+            HandlerMapping.class.getName() + ".uriTemplateVariables";
+
     private final Map<String, List<Handler>> handlers = new HashMap<>();
+
+    private final PathMatcher matcher = new PathMatcher();
 
     @Override
     public void setBeanFactory(MiniBeanFactory factory) {
@@ -95,28 +98,64 @@ public class HandlerMapping implements BeanFactoryAware {
 
     /**
      * 根据路径和请求方法获取Handler
-     * @param path
-     * @param requestMethod
+     * @param req
      * @return
      */
-    public Handler getHandler(String path,String requestMethod){
-        List<Handler> handlerList = handlers.get(path);
-        if(handlerList==null){
-            return null;
-        }
-        for(Handler handler : handlerList){
-            //遍历Handler列表，匹配请求方法
-            if(String.valueOf(handler.getRequestMethod()).equals(requestMethod)){
-                return handler;
+    public Handler getHandler(HttpServletRequest req){
+        String requestMethod = req.getMethod();
+        String path = req.getRequestURI();
+
+        List<Match> matches = new ArrayList<>();
+        boolean pathMatched = false;
+
+        for(Map.Entry<String, List<Handler>> entry : handlers.entrySet()) {
+            List<Handler> handlerList = entry.getValue();
+            String pattern = entry.getKey();
+            Map<String, String> vars = matcher.match(pattern, path);
+            if(vars == null)continue;
+            pathMatched = true;
+            int score = matcher.literalSegments(pattern);
+
+            for (Handler handler : handlerList) {
+                //遍历Handler列表，匹配请求方法
+                if (!String.valueOf(handler.getRequestMethod()).equals(requestMethod)) {
+                    continue;
+                }
+                matches.add(new Match(pattern,handler,vars,score));
             }
         }
-        throw new RequestMethodNotSupportedException(requestMethod,path);
+        if(matches.isEmpty()){
+            if(!pathMatched){
+                //没有任何模式匹配
+                return null;
+            }
+            //有模式匹配，但是没有这个请求方法的handler
+            throw new RequestMethodNotSupportedException(requestMethod,path);
+        }
+        //从大到小排序，选择匹配度最大的返回
+        matches.sort(Comparator.comparingInt(Match::score).reversed());
+        Match best = matches.get(0);
+        if(matches.size()>1){
+            if(best.score==matches.get(1).score){
+                //如果前两名匹配度相同，就报错
+                throw new IllegalStateException("Ambiguous handler methods mapped for '" + path
+                        + "': {" + best.pattern + ", " + matches.get(1).pattern + "}");
+            }
+        }
 
+        //将参数值存到请求当中
+        req.setAttribute(URI_TEMPLATE_VARIABLES_ATTRIBUTE, best.vars);
+        return best.handler;
     }
 
     private boolean isHandler(Class<?> type){
         return AnnotationUtils.findAnnotation(type,Controller.class)!=null;
     }
+
+    /**
+     * 比较每个pattern的数据载体
+     */
+    private record Match(String pattern, Handler handler, Map<String, String> vars, int score) { }
 
 
 }

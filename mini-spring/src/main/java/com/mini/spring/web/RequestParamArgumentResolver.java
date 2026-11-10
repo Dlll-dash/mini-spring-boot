@@ -3,7 +3,7 @@ package com.mini.spring.web;
 import com.mini.spring.SimpleTypeConverter;
 import com.mini.spring.web.annotation.RequestParam;
 import com.mini.spring.web.exception.RequestParamException;
-import com.sun.net.httpserver.HttpExchange;
+import jakarta.servlet.http.HttpServletRequest;
 
 import java.lang.reflect.Parameter;
 import java.net.URLDecoder;
@@ -17,7 +17,7 @@ import java.nio.charset.StandardCharsets;
 public class RequestParamArgumentResolver implements ArgumentResolver{
 
     @Override
-    public Object resolve(HttpExchange exchange, Parameter parameter){
+    public Object resolve(HttpServletRequest req, Parameter parameter){
 
         RequestParam ann = parameter.getAnnotation(RequestParam.class);
         //参数对应的query参数名
@@ -33,9 +33,9 @@ public class RequestParamArgumentResolver implements ArgumentResolver{
             }
         }
         //获取query参数，形式："name=x&age=1"
-        String query = exchange.getRequestURI().getRawQuery();
+        String query = req.getQueryString();
         if(query == null){
-            throw new RequestParamException("Query params in URI ["+exchange.getRequestURI()
+            throw new RequestParamException("Query params in URI ["+req.getRequestURI()
                     +"] is null");
         }
         //按“&”切割键值表达式
@@ -65,6 +65,6 @@ public class RequestParamArgumentResolver implements ArgumentResolver{
                 }
             }
         }
-        throw new RequestParamException("Cannot find any query param ["+queryName+"]: "+exchange.getRequestURI());
+        throw new RequestParamException("Cannot find any query param ["+queryName+"]: "+req.getRequestURI());
     }
 }

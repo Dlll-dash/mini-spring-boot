@@ -148,11 +148,17 @@ public class MiniContext implements ApplicationEventPublisher{
     }
 
     /**
-     * 暂时为手动关闭
+     * 暂时为手动关闭，提供{@link #onClose()}给子类覆写插入逻辑
      */
     public void close(){
         publishEvent(new ContextClosedEvent(this));
         stopLifeCycleBeans();
+        onClose();
+    }
+    /**
+     * 空方法，提供给子类覆写的入口，在{@link #close()}}方法最后调用
+     */
+    protected void onClose(){
     }
 
     private void stopLifeCycleBeans(){

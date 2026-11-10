@@ -1,23 +1,31 @@
 package com.mini.boot.web;
 
+import com.mini.boot.web.server.WebServer;
 import com.mini.spring.Lifecycle;
-import com.sun.net.httpserver.HttpServer;
+import org.apache.catalina.LifecycleException;
 
 public class WebServerStartStopLifecycle implements Lifecycle {
-    private HttpServer server;
+    private WebServer server;
 
-    WebServerStartStopLifecycle(HttpServer server){
+    WebServerStartStopLifecycle(WebServer server){
         this.server=server;
     }
 
     @Override
     public void start() {
-        server.start();
+        try {
+            server.start();
+        } catch (LifecycleException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
     public void stop(){
-        //不等在途请求
-        server.stop(0);
+        try {
+            server.stop();
+        } catch (LifecycleException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

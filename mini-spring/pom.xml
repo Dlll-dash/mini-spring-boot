@@ -17,11 +17,12 @@
     <maven.compiler.release>21</maven.compiler.release>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
-
-  <!--
-    零依赖。这是故意的：
-      1. 手写的容器不能"借" Spring —— 否则就分不清哪些是我写的、哪些是它干的
-      2. 顺便亲眼确认一件事：@Component / @Autowired 这些注解本身
-         【一分钱魔法都没有】，就是个标记 —— 全靠"有人去读它"
-  -->
+    <dependencies>
+        <dependency>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
+            <version>6.0.0</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
 </project>
