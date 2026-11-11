@@ -4,7 +4,7 @@ import com.mini.spring.annotation.Controller;
 import com.mini.spring.web.annotation.*;
 
 @RequestMapping("/HelloController")
-@Controller
+@RestController
 public class HelloController {
 
     @GetMapping("/hello")
@@ -40,8 +40,8 @@ public class HelloController {
 
     /** RequestBody */
     @PostMapping("/greet")
-    public String greet(@RequestBody Person person){
-        return "Hello from "+person.name;
+    public Person greet(@RequestBody Person person){
+        return new Person( person.name+"!");
     }
 
     private record Person(String name){}

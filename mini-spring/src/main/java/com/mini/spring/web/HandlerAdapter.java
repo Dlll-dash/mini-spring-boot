@@ -1,11 +1,14 @@
 package com.mini.spring.web;
 
 import com.mini.spring.MiniBeanFactory;
+import com.mini.spring.annotation.AnnotationUtils;
 import com.mini.spring.web.annotation.PathVariable;
 import com.mini.spring.web.annotation.RequestBody;
 import com.mini.spring.web.annotation.RequestParam;
+import com.mini.spring.web.annotation.ResponseBody;
 import com.mini.spring.web.converter.HttpMessageConverter;
 import com.mini.spring.web.converter.JacksonHttpMessageConverter;
+import com.mini.spring.web.converter.StringHttpMessageConverter;
 import com.mini.spring.web.exception.HttpMediaTypeNotSupportedException;
 import com.mini.spring.web.exception.HttpMessageNotReadableException;
 import com.mini.spring.web.exception.RequestParamException;
@@ -33,7 +36,7 @@ public class HandlerAdapter {
             PathVariable.class, PathVariableArgumentResolver.class
             );
 
-    private final List<HttpMessageConverter<Object>> converters = List.of(new JacksonHttpMessageConverter());
+    private final List<HttpMessageConverter<Object>> converters = List.of(new StringHttpMessageConverter(),new JacksonHttpMessageConverter());
 
     HandlerAdapter(MiniBeanFactory factory){
         this.factory=factory;
@@ -58,8 +61,9 @@ public class HandlerAdapter {
     public void handle(Handler handler, HttpServletRequest req, HttpServletResponse res)throws IOException {
         Object bean = factory.getBean(handler.getBeanName());
         Object[] args;
+        Method method = handler.getMethod();
         try {
-            args = resolveArgs(handler.getMethod(), req);
+            args = resolveArgs(method, req);
 
         }catch (HttpMediaTypeNotSupportedException e){
             //Content-type不支持，无法解析 RequestBody，响应码 415
@@ -83,9 +87,10 @@ public class HandlerAdapter {
 
         }
         Object result;
+
         try {
             //传入参数，调用方法，获取结果
-            result = handler.getMethod().invoke(bean, args);
+            result = method.invoke(bean, args);
         }catch (IllegalAccessException e) {
             WebUtils.write(res,500,e.getMessage());
             return;
@@ -100,6 +105,17 @@ public class HandlerAdapter {
             throw new RuntimeException(cause);
         }
         //写入响应
+        Class<?> type = result != null ? result.getClass() : method.getReturnType();
+        if(method.isAnnotationPresent(ResponseBody.class) ||
+                AnnotationUtils.findAnnotation(method.getDeclaringClass(), ResponseBody.class)!=null){
+            for(HttpMessageConverter<Object> converter : converters){
+                //type 为 null表示不限制,暂时先不做限制
+                if(converter.canWrite(type,null)){
+                    converter.write(result,res);
+                    return;
+                }
+            }
+        }
         WebUtils.write(res,200,String.valueOf(result));
     }
 
