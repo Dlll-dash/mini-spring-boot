@@ -34,7 +34,6 @@ public class DispatcherServlet extends HttpServlet {
             handlerMapping = factory.getBean(HandlerMapping.class);
         }
         //获取路径对应的方法 handler
-        String requestMethod = req.getMethod();
         Handler handler;
         try {
             handler = handlerMapping.getHandler(req);

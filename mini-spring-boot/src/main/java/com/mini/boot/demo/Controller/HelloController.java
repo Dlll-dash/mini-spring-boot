@@ -22,6 +22,7 @@ public class HelloController {
         return String.valueOf(a + b);
     }
 
+    /** PathVariable */
     @GetMapping("/item/{id}")
     public String item(@PathVariable("id") String id){return id;}
 
@@ -36,4 +37,12 @@ public class HelloController {
 
     @GetMapping("/{x}/{y}")
     public String T4(){return "T4";}
+
+    /** RequestBody */
+    @PostMapping("/greet")
+    public String greet(@RequestBody Person person){
+        return "Hello from "+person.name;
+    }
+
+    private record Person(String name){}
 }
