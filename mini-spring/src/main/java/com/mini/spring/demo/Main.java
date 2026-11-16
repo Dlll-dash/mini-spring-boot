@@ -42,8 +42,7 @@ public class Main {
 
         System.out.println(ctx.getBean(Greeter.class).greet());
 
-        HandlerMapping hm = ctx.getBean(HandlerMapping.class);
-        //System.out.println(hm.getHandler("/hello","GET"));
-        //System.out.println(hm.getHandler("/probe","GET"));
+        System.out.println("---⑦：数据库---");
+        System.out.println(ctx.getBean(UserQueryService.class).findName(42));
     }
 }

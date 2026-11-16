@@ -233,7 +233,7 @@ mini-spring-boot/src/main/resources/META-INF/spring/
 
 已跑通：IoC 主干、AOP、事件、`@Bean`、`@Conditional`、`Environment` + `@Value`、
 `@Import` 三条分支（外加 `DeferredImportSelector` 延迟导入）、自动配置清单、内嵌 Tomcat 容器、
-MVC 主干（`@RestController` 闸门 + 类级 `@RequestMapping`  + `@RequestParam`+`@PathVariable`+`@ResquestBody`，解参失败 400 / 路径未映射 404 / 方法抛异常 500）。
+MVC 主干（`@RestController`  + 类级 `@RequestMapping`  + 方法级 Mapping(`@GetMapping`、`PostMapping`...等) `@RequestParam`+`@PathVariable`+`@RequestBody`三种参数解析，解参失败 400 / 路径未映射 404 / 方法抛异常 500）。
 
 未实现：`@Qualifier` / `@Primary` 仲裁、prototype 作用域、`@PreDestroy` 与 Bean 销毁、
-无接口类的代理、AspectJ 切点表达式、嵌套配置类、`@Bean("name")`、。
+无接口类的代理、AspectJ 切点表达式、嵌套配置类、`@Bean("name")`。

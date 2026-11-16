@@ -65,7 +65,7 @@ public class MiniContext implements ApplicationEventPublisher{
          //完成bean初始化
         finishBeanFactoryInitialization();
 
-        //结束refresh，广播事件
+        //结束refresh，启动内置容器 + 广播事件
         finishRefresh();
     }
 

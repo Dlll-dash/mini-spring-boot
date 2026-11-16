@@ -25,17 +25,27 @@ public abstract class AbstractHttpMessageConverter implements HttpMessageConvert
         return false;
     }
 
+    /**
+     * 符合子类支持的MediaType
+     * @param clazz
+     * @param type
+     * @return
+     */
     @Override
     public boolean canWrite(Class<?> clazz,String type) {
         return supports(clazz)&&canWrite(type);
     }
 
+    /**
+     * 通配符匹配
+     * @param type
+     * @return
+     */
     protected boolean canWrite(String type){
-        //本应是通配符匹配 text/* -> text/plain,text/html
         if(type==null){
             return true;
         }
-        //暂时先硬编码匹配
+        //通配符匹配
         for(String mediaType: supportedMediaTypes){
             if(isCompatible(mediaType,type)){
                 return true;
@@ -45,16 +55,26 @@ public abstract class AbstractHttpMessageConverter implements HttpMessageConvert
     }
 
     /**
-     * 子类覆写
+     * 子类覆写，子类各自实际支持的逻辑
      * @param clazz
      * @return
      */
     protected abstract boolean supports(Class<?> clazz);
 
+    /**
+     * 提供给子类调用，设置各自独立的支持类型
+     * @param supportedMediaTypes
+     */
     public void setSupportedMediaTypes(List<String> supportedMediaTypes) {
         this.supportedMediaTypes = List.copyOf(supportedMediaTypes);
     }
 
+    /**
+     * 对两个类型进行通配符匹配
+     * @param s1
+     * @param s2
+     * @return
+     */
     protected boolean isCompatible(String s1,String s2){
         if(s1==null||s2==null){
             return true;
@@ -64,6 +84,15 @@ public abstract class AbstractHttpMessageConverter implements HttpMessageConvert
         return doCompare(split1[0],split2[0]);
     }
 
+    /**
+     * 递归进行匹配，首先以{@code /}将两个初始串分割成前后两个部分，两两进行对应匹配；
+     * 对存在{@code +}后缀匹配分割成前缀和后缀，再两两进行对应匹配；
+     * 对通配符{@code *}直接返回匹配结果为{@code true}；
+     * 最后进行字面匹配
+     * @param s1
+     * @param s2 任意两个 {@code mediaType} 字符串
+     * @return
+     */
     private boolean doCompare(String s1,String s2){
         //一轮切割
         if(s1.contains("/")&&s2.contains("/")){

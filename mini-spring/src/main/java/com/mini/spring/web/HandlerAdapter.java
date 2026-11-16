@@ -20,7 +20,6 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -59,9 +58,9 @@ public class HandlerAdapter {
      * @throws IOException
      */
     public void handle(Handler handler, HttpServletRequest req, HttpServletResponse res)throws IOException {
-        Object bean = factory.getBean(handler.getBeanName());
+        Object bean = factory.getBean(handler.beanName());
         Object[] args;
-        Method method = handler.getMethod();
+        Method method = handler.method();
         try {
             args = resolveArgs(method, req);
 

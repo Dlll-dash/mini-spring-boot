@@ -118,7 +118,7 @@ public class HandlerMapping implements BeanFactoryAware {
 
             for (Handler handler : handlerList) {
                 //遍历Handler列表，匹配请求方法
-                if (!String.valueOf(handler.getRequestMethod()).equals(requestMethod)) {
+                if (!String.valueOf(handler.requestMethod()).equals(requestMethod)) {
                     continue;
                 }
                 matches.add(new Match(pattern,handler,vars,score));

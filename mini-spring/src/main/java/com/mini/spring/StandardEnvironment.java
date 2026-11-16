@@ -57,14 +57,15 @@ public class StandardEnvironment implements Environment{
 
         }
 
-
+        //从系统变量中获取值
         String result = getProperty(key);
+
         if(result==null){
-            //没有值就使用默认值
+            //系统中没有值就使用默认值
             if(defaultValue!=null){
                 result = defaultValue;
             }else{
-                //没有默认值就直接保留原文，包括${}
+                //默认值都没有就直接保留原文，包括${}
                 result = text.substring(preIdx,endIdx+1);
             }
         }
