@@ -4,6 +4,7 @@ import com.mini.spring.annotation.Bean;
 import com.mini.spring.annotation.Configuration;
 import com.mini.spring.annotation.Value;
 import com.mini.spring.jdbc.core.JdbcTemplate;
+import com.mini.spring.jdbc.datasource.DataSourceTransactionManager;
 import com.mini.spring.jdbc.datasource.DriverManagerDataSource;
 
 import javax.sql.DataSource;
@@ -30,4 +31,9 @@ public class DataSourceConfig {
 
     @Bean
     public JdbcTemplate jdbcTemplate(DataSource dataSource){ return new JdbcTemplate(dataSource);}
+
+    @Bean
+    public DataSourceTransactionManager dataSourceTransactionManager(DataSource dataSource){
+        return new DataSourceTransactionManager(dataSource);
+    }
 }

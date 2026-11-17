@@ -3,6 +3,7 @@ package com.mini.spring.jdbc.core;
 import com.mini.spring.dao.DataAccessException;
 import com.mini.spring.dao.EmptyResultDataAccessException;
 import com.mini.spring.dao.IncorrectResultSizeDataAccessException;
+import com.mini.spring.jdbc.datasource.DataSourceUtils;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -36,15 +37,15 @@ public class JdbcTemplate {
      * @throws DataAccessException
      */
     public <T> T execute(String sql, PreparedStatementCallback<T> action) throws DataAccessException {
-
-        try(//获取连接
-            Connection connection = dataSource.getConnection();
-            //获取preparedStatement
-            PreparedStatement ps = createPreparedStatement(connection, sql)){
+        //获取连接
+        Connection connection = DataSourceUtils.getConnection(dataSource);
+        try(PreparedStatement ps = createPreparedStatement(connection, sql)){
             //回调
             return action.doInPreparedStatement(ps);
         }catch (SQLException ex){
             throw new DataAccessException("PreparedStatementCallback for SQL ["+sql+"]",ex);
+        }finally {
+            DataSourceUtils.releaseConnection(connection,dataSource);
         }
     }
 

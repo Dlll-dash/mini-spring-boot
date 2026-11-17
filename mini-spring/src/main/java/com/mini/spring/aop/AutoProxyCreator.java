@@ -60,7 +60,7 @@ public class AutoProxyCreator implements BeanPostProcessor, BeanFactoryAware {
     }
 
     /**
-     * 判断是否要生成代理类
+     * 在判断需要生成代理类后进行代理
      * @param bean
      * @param beanName
      * @return
@@ -111,14 +111,14 @@ public class AutoProxyCreator implements BeanPostProcessor, BeanFactoryAware {
                     if(chain.size()==0){
                         return invokeTarget(bean,method,args);
                     }
-                    //需要代理，传入bean，形成闭包
+                    //需要代理，传入bean，形成闭包接口实现
                     MethodInvocation invocation = ()-> invokeTarget(bean,method,args);
 
                     //从后往前包拦截器链
                     for(int i=chain.size()-1;i>=0;i--){
                         MethodInterceptor interceptor= chain.get(i).getAdvice();
                         MethodInvocation next = invocation;
-                        //不断调用下一个拦截器逻辑
+                        //不断嵌套包裹下一个拦截器的调用逻辑，形成拦截器调用链
                         invocation = ()-> interceptor.invoke(next);
                     }
                     return invocation.proceed();
@@ -139,6 +139,7 @@ public class AutoProxyCreator implements BeanPostProcessor, BeanFactoryAware {
                 result.add(advisor);
             }
         }
+        //按照拦截器的order进行排序
         result.sort(new OrderComparator());
         return result;
 

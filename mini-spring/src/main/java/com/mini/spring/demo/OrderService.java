@@ -7,9 +7,11 @@ import com.mini.spring.annotation.Transactional;
 
 public interface OrderService {
 
-    public String orderOf(long userId);
+    String orderOf(long userId);
 
-    public String cancel(long userId);
+    String cancel(long userId);
 
-    public String describe(long userId);
+    String describe(long userId);
+
+    void placeOrder(String name);
 }

@@ -4,6 +4,7 @@ import com.mini.spring.MiniContext;
 import com.mini.spring.annotation.ComponentScan;
 import com.mini.spring.annotation.Import;
 import com.mini.spring.config.TransactionConfig;
+import com.mini.spring.dao.DataAccessException;
 import com.mini.spring.web.HandlerMapping;
 
 import java.util.Arrays;
@@ -44,5 +45,8 @@ public class Main {
 
         System.out.println("---⑦：数据库---");
         System.out.println(ctx.getBean(UserQueryService.class).findName(42));
+
+        ctx.getBean(OrderService.class).placeOrder("tx-boom");
+
     }
 }

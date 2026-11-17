@@ -1,12 +1,15 @@
 package com.mini.spring.demo;
 
 import com.mini.spring.annotation.*;
+import com.mini.spring.jdbc.core.JdbcTemplate;
 
 @Service
 public class OrderServiceImpl implements OrderService{
 
     @Autowired
     UserRepository userRepository;
+    @Autowired
+    JdbcTemplate jdbcTemplate;
 
     @PostConstruct
     public void init(){
@@ -32,4 +35,12 @@ public class OrderServiceImpl implements OrderService{
     public String describe(long userId) {
         return "describe user#" + userId;
     }
+
+    @Transactional
+    public void placeOrder(String name) {
+        jdbcTemplate.update("INSERT INTO t_user(id,name) VALUES (?,?)",12, name);
+        throw new RuntimeException("boom");
+    }
+
+
 }
