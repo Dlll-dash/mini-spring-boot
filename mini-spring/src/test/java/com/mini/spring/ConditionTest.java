@@ -1,5 +1,8 @@
 package com.mini.spring;
 
+import com.mini.spring.beans.BeanDefinition;
+import com.mini.spring.beans.MiniBeanFactory;
+import com.mini.spring.context.annotation.OnMissingBeanCondition;
 import com.mini.spring.fixture.conditional.ConditionalApp;
 import org.junit.jupiter.api.Test;
 
