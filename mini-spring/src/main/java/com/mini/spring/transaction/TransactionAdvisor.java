@@ -1,8 +1,8 @@
 package com.mini.spring.transaction;
 
-import com.mini.spring.BeanFactoryAware;
-import com.mini.spring.MiniBeanFactory;
-import com.mini.spring.Ordered;
+import com.mini.spring.beans.BeanFactoryAware;
+import com.mini.spring.beans.MiniBeanFactory;
+import com.mini.spring.core.Ordered;
 import com.mini.spring.aop.Advisor;
 import com.mini.spring.aop.MethodInterceptor;
 import com.mini.spring.aop.Pointcut;

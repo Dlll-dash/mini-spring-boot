@@ -1,6 +1,6 @@
 package com.mini.spring.web;
 
-import com.mini.spring.SimpleTypeConverter;
+import com.mini.spring.core.SimpleTypeConverter;
 import com.mini.spring.web.annotation.PathVariable;
 import com.mini.spring.web.exception.MissingPathVariableException;
 import com.mini.spring.web.exception.RequestParamException;

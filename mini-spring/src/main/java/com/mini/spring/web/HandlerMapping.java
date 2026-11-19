@@ -1,7 +1,7 @@
 package com.mini.spring.web;
 
-import com.mini.spring.BeanFactoryAware;
-import com.mini.spring.MiniBeanFactory;
+import com.mini.spring.beans.BeanFactoryAware;
+import com.mini.spring.beans.MiniBeanFactory;
 import com.mini.spring.annotation.AnnotationUtils;
 import com.mini.spring.annotation.Controller;
 import com.mini.spring.web.annotation.RequestMapping;

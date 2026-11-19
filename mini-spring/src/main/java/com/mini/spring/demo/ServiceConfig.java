@@ -1,6 +1,6 @@
 package com.mini.spring.demo;
 
-import com.mini.spring.OnMissingBeanCondition;
+import com.mini.spring.context.annotation.OnMissingBeanCondition;
 import com.mini.spring.annotation.*;
 
 @Import(DemoSelector.class)

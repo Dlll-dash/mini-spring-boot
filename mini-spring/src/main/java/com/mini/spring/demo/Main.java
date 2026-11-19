@@ -3,7 +3,6 @@ package com.mini.spring.demo;
 import com.mini.spring.MiniContext;
 import com.mini.spring.annotation.ComponentScan;
 import com.mini.spring.annotation.Import;
-import com.mini.spring.config.TransactionConfig;
 import com.mini.spring.dao.DataAccessException;
 import com.mini.spring.web.HandlerMapping;
 

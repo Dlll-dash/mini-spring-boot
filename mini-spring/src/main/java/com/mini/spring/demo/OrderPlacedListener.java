@@ -1,6 +1,6 @@
 package com.mini.spring.demo;
 
-import com.mini.spring.ApplicationListener;
+import com.mini.spring.context.ApplicationListener;
 import com.mini.spring.annotation.Component;
 
 @Component

@@ -1,6 +1,6 @@
 package com.mini.spring.web;
 
-import com.mini.spring.MiniBeanFactory;
+import com.mini.spring.beans.MiniBeanFactory;
 import com.mini.spring.annotation.AnnotationUtils;
 import com.mini.spring.web.annotation.PathVariable;
 import com.mini.spring.web.annotation.RequestBody;

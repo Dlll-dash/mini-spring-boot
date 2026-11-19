@@ -1,6 +1,6 @@
 package com.mini.spring.transaction;
 
-import com.mini.spring.ImportSelector;
+import com.mini.spring.context.annotation.ImportSelector;
 
 public class TransactionSelector implements ImportSelector {
     @Override

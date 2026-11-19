@@ -1,7 +1,7 @@
 package com.mini.spring.demo;
 
-import com.mini.spring.BeanDefinitionRegistry;
-import com.mini.spring.Condition;
+import com.mini.spring.beans.BeanDefinitionRegistry;
+import com.mini.spring.context.annotation.Condition;
 
 import java.lang.reflect.AnnotatedElement;
 

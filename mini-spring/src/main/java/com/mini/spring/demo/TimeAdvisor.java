@@ -1,6 +1,6 @@
 package com.mini.spring.demo;
 
-import com.mini.spring.Ordered;
+import com.mini.spring.core.Ordered;
 import com.mini.spring.annotation.Component;
 import com.mini.spring.aop.Advisor;
 import com.mini.spring.aop.MethodInterceptor;

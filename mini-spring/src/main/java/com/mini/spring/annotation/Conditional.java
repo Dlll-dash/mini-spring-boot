@@ -1,6 +1,6 @@
 package com.mini.spring.annotation;
 
-import com.mini.spring.Condition;
+import com.mini.spring.context.annotation.Condition;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

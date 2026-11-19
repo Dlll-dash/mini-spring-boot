@@ -1,6 +1,6 @@
 package com.mini.spring.demo;
 
-import com.mini.spring.ApplicationEvent;
+import com.mini.spring.context.ApplicationEvent;
 
 public class OrderPlacedEvent extends ApplicationEvent {
 

@@ -1,7 +1,7 @@
 package com.mini.boot.context.annotation;
 
 import com.mini.boot.annotation.AutoConfiguration;
-import com.mini.spring.DeferredImportSelector;
+import com.mini.spring.context.annotation.DeferredImportSelector;
 
 import java.util.ArrayList;
 import java.util.List;

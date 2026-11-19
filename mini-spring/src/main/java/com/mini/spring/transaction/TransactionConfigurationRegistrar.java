@@ -1,8 +1,8 @@
 package com.mini.spring.transaction;
 
-import com.mini.spring.BeanDefinition;
-import com.mini.spring.BeanDefinitionRegistry;
-import com.mini.spring.ImportBeanDefinitionRegistrar;
+import com.mini.spring.beans.BeanDefinition;
+import com.mini.spring.beans.BeanDefinitionRegistry;
+import com.mini.spring.context.annotation.ImportBeanDefinitionRegistrar;
 
 public class TransactionConfigurationRegistrar implements ImportBeanDefinitionRegistrar {
     @Override

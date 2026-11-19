@@ -1,7 +1,7 @@
 package com.mini.boot.web;
 
 import com.mini.boot.web.server.WebServer;
-import com.mini.spring.Lifecycle;
+import com.mini.spring.context.Lifecycle;
 import org.apache.catalina.LifecycleException;
 
 public class WebServerStartStopLifecycle implements Lifecycle {

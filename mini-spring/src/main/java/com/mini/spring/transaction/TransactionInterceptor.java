@@ -1,6 +1,6 @@
 package com.mini.spring.transaction;
 
-import com.mini.spring.MiniBeanFactory;
+import com.mini.spring.beans.MiniBeanFactory;
 import com.mini.spring.aop.MethodInterceptor;
 import com.mini.spring.aop.MethodInvocation;
 

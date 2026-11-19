@@ -2,7 +2,7 @@ package com.mini.boot.web;
 
 import com.mini.boot.web.embedded.tomcat.TomcatWebServer;
 import com.mini.boot.web.server.WebServer;
-import com.mini.spring.BeanDefinition;
+import com.mini.spring.beans.BeanDefinition;
 import com.mini.spring.MiniContext;
 import com.mini.spring.web.DispatcherServlet;
 import com.mini.spring.web.HandlerMapping;

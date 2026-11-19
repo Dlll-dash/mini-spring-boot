@@ -1,9 +1,9 @@
 package com.mini.spring.aop;
 
-import com.mini.spring.BeanFactoryAware;
-import com.mini.spring.BeanPostProcessor;
-import com.mini.spring.MiniBeanFactory;
-import com.mini.spring.OrderComparator;
+import com.mini.spring.beans.BeanFactoryAware;
+import com.mini.spring.beans.BeanPostProcessor;
+import com.mini.spring.beans.MiniBeanFactory;
+import com.mini.spring.core.OrderComparator;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;

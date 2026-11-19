@@ -1,7 +1,7 @@
 package com.mini.spring.demo;
 
-import com.mini.spring.DeferredImportSelector;
-import com.mini.spring.ImportSelector;
+import com.mini.spring.context.annotation.DeferredImportSelector;
+import com.mini.spring.context.annotation.ImportSelector;
 
 public class DemoSelector implements DeferredImportSelector {
     @Override

@@ -1,6 +1,6 @@
 package com.mini.spring.transaction;
 
-import com.mini.spring.Ordered;
+import com.mini.spring.core.Ordered;
 import com.mini.spring.annotation.Import;
 
 import java.lang.annotation.ElementType;

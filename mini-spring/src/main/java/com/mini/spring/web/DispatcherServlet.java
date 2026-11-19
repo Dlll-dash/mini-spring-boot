@@ -1,6 +1,6 @@
 package com.mini.spring.web;
 
-import com.mini.spring.MiniBeanFactory;
+import com.mini.spring.beans.MiniBeanFactory;
 import com.mini.spring.web.exception.RequestMethodNotSupportedException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
