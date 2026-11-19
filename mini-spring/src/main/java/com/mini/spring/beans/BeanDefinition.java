@@ -12,6 +12,8 @@ public class BeanDefinition {
 
     private String factoryMethodName;
 
+    private boolean primary = false;
+
     public BeanDefinition(String beanName,Class<?> beanType){
         this.beanName=beanName;
         this.beanType=beanType;
@@ -58,4 +60,12 @@ public class BeanDefinition {
     }
 
     public void setFactoryMethodName(String factoryMethodName){this.factoryMethodName=factoryMethodName;}
+
+    public boolean isPrimary(){
+        return primary;
+    }
+
+    public void setPrimary(boolean primary){
+        this.primary = primary;
+    }
 }

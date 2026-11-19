@@ -136,7 +136,7 @@ public class ConfigurationClassProcessor implements BeanFactoryPostProcessor{
                     }
                     //注册(暂时)
                     String beanName= Introspector.decapitalize(f.getName().replace(".class",""));
-                    registry.registerBeanDefinition(beanName,new BeanDefinition(beanName,c));
+                    registry.registerBeanDefinition(beanName,new BeanDefinition(beanName, c));
                 }
             }
         }
@@ -268,6 +268,11 @@ public class ConfigurationClassProcessor implements BeanFactoryPostProcessor{
         //方法名即为bean名称
         beanDefinition.setBeanName(methodName);
         beanDefinition.setBeanType(beanType);
+
+        //被 @Primary 修饰
+        if(beanMethod.isAnnotationPresent(Primary.class)){
+            beanDefinition.setPrimary(true);
+        }
 
         registry.registerBeanDefinition(methodName,beanDefinition);
     }

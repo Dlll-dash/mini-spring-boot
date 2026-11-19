@@ -2,6 +2,7 @@ package com.mini.spring.beans;
 
 import com.mini.spring.annotation.Autowired;
 import com.mini.spring.annotation.Bean;
+import com.mini.spring.annotation.Primary;
 import com.mini.spring.annotation.Value;
 import com.mini.spring.core.SimpleTypeConverter;
 import com.mini.spring.core.StringValueResolver;
@@ -37,6 +38,11 @@ public class MiniBeanFactory implements BeanDefinitionRegistry{
 
     @Override
     public void registerBeanDefinition(String beanName, BeanDefinition beanDefinition) {
+        //如果是工程方法生成的BeanDefinition，beanType是返回类型，没有办法代表自己。
+        //这里的判断是针对使用类级Primary注释的Bean
+        if(beanDefinition.getFactoryBeanName()==null&&beanDefinition.getBeanType().isAnnotationPresent(Primary.class)){
+            beanDefinition.setPrimary(true);
+        }
         if(beanDefinitions.put(beanName, beanDefinition)==null) {
             beanDefinitionNames.add(beanName);
         }
@@ -246,28 +252,39 @@ public class MiniBeanFactory implements BeanDefinitionRegistry{
     }
 
     /**
-     * 通过类型获得bean实例 有O(N)的代价
+     * 通过类型获得bean实例，遍历整个BeanDefinitions列表逐个匹配。
+     * 如果有多个匹配的bean，那么就优先返回{@link Primary}所修饰的Bean，
+     * 如果有多个或没有，就报出{@link NoUniqueBeanDefinitionException}异常
      * @param type
      * @return
      * @param <T>
      */
     public <T> T getBean(Class<T> type){
-        String matchedName=null;
+        List<String> matchedNames = new ArrayList<>();
         for(BeanDefinition bd:beanDefinitions.values()){
             Class<?> beanType=bd.getBeanType();
             if(type.isAssignableFrom(beanType)){
-                if(matchedName!=null){
-                    throw new NoUniqueBeanDefinitionException(
-                            "expected single matching bean but found more than one: "
-                                    + matchedName + ", " + bd.getBeanName());
-                }
-                matchedName=bd.getBeanName();
+                matchedNames.add(bd.getBeanName());
             }
         }
-        if(matchedName==null){
+        if(matchedNames.isEmpty()){
             throw new NoSuchBeanDefinitionException("BeanDefinition Not Found");
         }
-        return (T) getBean(matchedName);
+        if(matchedNames.size()==1){
+            return getBean(matchedNames.get(0));
+        }
+        List<String>primaryNames = new ArrayList<>();
+        for(String matchedName : matchedNames){
+            if(getBeanDefinition(matchedName).isPrimary()){
+                primaryNames.add(matchedName);
+            }
+        }
+        if(primaryNames.size()==1){
+            return getBean(primaryNames.get(0));
+        }
+
+        throw new NoUniqueBeanDefinitionException("expected single matching bean but found more than one: "
+                                        + String.join(", ", matchedNames));
     }
 
     /**
