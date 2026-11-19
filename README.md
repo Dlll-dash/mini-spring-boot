@@ -4,6 +4,8 @@
 
 # mini-spring-boot
 
+[![build](https://github.com/Dlll-dash/mini-spring-boot/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/Dlll-dash/mini-spring-boot/actions/workflows/build.yml)
+
 从零手写的 Spring 最小实现，希望帮助你更好理解spring，spring-boot原理。基于源码做简化实现：
 
 | 模块 | 对标 | 负责 |
