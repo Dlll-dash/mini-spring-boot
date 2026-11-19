@@ -300,17 +300,7 @@ public class ConfigurationClassProcessor implements BeanFactoryPostProcessor{
     /**
      * 内部类，存储配置类和选择器对。
      */
-    private class DeferredImportSelectorHolder{
-
-        private Class<?> configClass;
-
-        private DeferredImportSelector importSelector;
-
-        DeferredImportSelectorHolder(Class<?> configClass,DeferredImportSelector importSelector){
-            this.configClass=configClass;
-            this.importSelector=importSelector;
-        }
-
+    private record DeferredImportSelectorHolder(Class<?> configClass,DeferredImportSelector importSelector){
         public Class<?> getConfigClass(){
             return configClass;
         }
