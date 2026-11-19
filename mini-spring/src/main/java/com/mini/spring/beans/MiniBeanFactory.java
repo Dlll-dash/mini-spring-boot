@@ -1,9 +1,6 @@
 package com.mini.spring.beans;
 
-import com.mini.spring.annotation.Autowired;
-import com.mini.spring.annotation.Bean;
-import com.mini.spring.annotation.Primary;
-import com.mini.spring.annotation.Value;
+import com.mini.spring.annotation.*;
 import com.mini.spring.core.SimpleTypeConverter;
 import com.mini.spring.core.StringValueResolver;
 import com.mini.spring.exception.BeanAlreadyExistsException;
@@ -140,6 +137,11 @@ public class MiniBeanFactory implements BeanDefinitionRegistry{
                 if(f.isAnnotationPresent(Autowired.class)){
                     f.setAccessible(true);
                     try {
+                        if(f.isAnnotationPresent(Qualifier.class)){
+                            //如果被@Qualifier标记
+                            f.set(obj,getBean(f.getType(),f.getAnnotation(Qualifier.class).value()));
+                            continue;
+                        }
                         //递归注入
                         f.set(obj, getBean(f.getType()));
                     }catch (IllegalAccessException e){
@@ -252,29 +254,42 @@ public class MiniBeanFactory implements BeanDefinitionRegistry{
     }
 
     /**
-     * 通过类型获得bean实例，遍历整个BeanDefinitions列表逐个匹配。
+     * 转发{@link #getBean(Class, String)},通过类型获得bean实例，遍历整个BeanDefinitions列表逐个匹配。
      * 如果有多个匹配的bean，那么就优先返回{@link Primary}所修饰的Bean，
-     * 如果有多个或没有，就报出{@link NoUniqueBeanDefinitionException}异常
      * @param type
      * @return
      * @param <T>
      */
     public <T> T getBean(Class<T> type){
-        List<String> matchedNames = new ArrayList<>();
-        for(BeanDefinition bd:beanDefinitions.values()){
-            Class<?> beanType=bd.getBeanType();
-            if(type.isAssignableFrom(beanType)){
-                matchedNames.add(bd.getBeanName());
-            }
+        return getBean(type,null);
+    }
+
+    /**
+     * 通过类型匹配获得候选名单。
+     * 优先对同类型的别名条件进行筛选，去掉不符合条件的候选。若候选名单为空，则会报{@link NoSuchBeanDefinitionException}异常
+     * 如果有多个别名相同同类型bean，就进入Primary优先级判断。
+     * 如果有多个优先匹配的bean或者没有，则报{@link NoUniqueBeanDefinitionException}异常
+     * @param type Bean的类型
+     * @param qualifier Bean的别名
+     * @return Bean实例
+     * @param <T>
+     */
+    public <T> T getBean(Class<T>type,String qualifier){
+        List<String> names = new ArrayList<>(List.of(getBeanNamesForType(type)));
+        if(qualifier!=null){
+            //将不符合筛选器的候选去掉
+            names.removeIf(name -> !name.equals(qualifier));
         }
-        if(matchedNames.isEmpty()){
-            throw new NoSuchBeanDefinitionException("BeanDefinition Not Found");
+        if(names.isEmpty()){
+            throw new NoSuchBeanDefinitionException("expected bean ["+type+"] with qualifier name ["+qualifier+"] not found");
         }
-        if(matchedNames.size()==1){
-            return getBean(matchedNames.get(0));
+        if(names.size()==1){
+            return getBean(names.get(0));
         }
+
+        //有多个符合别名的bean，进入Primary筛选
         List<String>primaryNames = new ArrayList<>();
-        for(String matchedName : matchedNames){
+        for(String matchedName : names){
             if(getBeanDefinition(matchedName).isPrimary()){
                 primaryNames.add(matchedName);
             }
@@ -282,9 +297,8 @@ public class MiniBeanFactory implements BeanDefinitionRegistry{
         if(primaryNames.size()==1){
             return getBean(primaryNames.get(0));
         }
-
         throw new NoUniqueBeanDefinitionException("expected single matching bean but found more than one: "
-                                        + String.join(", ", matchedNames));
+                + String.join(", ", names));
     }
 
     /**
@@ -310,7 +324,7 @@ public class MiniBeanFactory implements BeanDefinitionRegistry{
      * @return
      */
     public String[] getBeanNamesForType(Class<?> type){
-        ArrayList<String>result=new ArrayList<>();
+        List<String>result=new ArrayList<>();
         for(String beanName:beanDefinitionNames){
             BeanDefinition bd=beanDefinitions.get(beanName);
             if(type.isAssignableFrom(bd.getBeanType())){
