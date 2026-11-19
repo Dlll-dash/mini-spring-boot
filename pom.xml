@@ -10,10 +10,8 @@
   <packaging>pom</packaging>
 
   <!--
-    聚合 pom：把两个模块列在一起。
-
-    两个子模块没有 <parent>，所以它们各自保留自己的 groupId / version，
-    这里只负责让构建工具和 IDE 知道"它们是一个工程里的两个模块"。
+    父 pom：两个子模块通过 <parent> 继承这里的插件配置，模块之间不互相继承依赖。
+    -parameters 必须开：@RequestParam 不写名字时靠它读形参名。
   -->
   <modules>
     <module>mini-spring</module>
@@ -24,9 +22,16 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.13.0</version>
                 <configuration>
                     <parameters>true</parameters>
                 </configuration>
+            </plugin>
+            <!-- surefire 3.x 才认 JUnit 5。用默认的 2.x 时测试会被静默跳过 -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.5.2</version>
             </plugin>
         </plugins>
     </build>
