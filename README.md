@@ -25,6 +25,7 @@
 | 包扫描 + BeanDefinition 注册 | `ConfigurationClassProcessor` | `ConfigurationClassPostProcessor` |
 | Bean 创建、三级缓存、循环依赖 | `MiniBeanFactory` | `DefaultListableBeanFactory` + `DefaultSingletonBeanRegistry` |
 | `@Autowired` 字段注入 / `@PostConstruct` / `@Value` | `InitAnnotationBeanPostProcessor` | `AutowiredAnnotationBeanPostProcessor` + `CommonAnnotationBeanPostProcessor` |
+| 同类型多候选仲裁 | `@Primary` 标在配方上；`@Qualifier` 在候选集合里先过滤，再走 primary | `determineAutowireCandidate` + `QualifierAnnotationAutowireCandidateResolver` |
 | 构造参数注入 | `MiniBeanFactory.createBean` | `ConstructorResolver` |
 | `@Bean` 工厂方法 | 同上 | `ConfigurationClassBeanDefinitionReader` |
 | `@Conditional` / `OnMissingBeanCondition` | `Condition` | `ConditionEvaluator` |
@@ -59,7 +60,7 @@
 ## 环境要求
 
 - JDK 21（`maven.compiler.release=21`）
-- MySQL 8（Demo测试需要，`Main` 从 ② 往后都走数据库，见「准备数据库」）
+- MySQL 8（demo 的 `Main` 从 ② 往后走数据库，见「准备数据库」）
 - 两个模块都有 `pom.xml`，根目录是父 pom（两个子模块通过 `<parent>` 继承），IDEA 可直接识别。
 - 构建用仓库自带的 Maven Wrapper（`./mvnw`，Windows 是 `mvnw.cmd`），本机不需要装 Maven。
 - 依赖：`jakarta.servlet-api`（provided，框架代码只在编译期用）、`tomcat-embed-core` + `tomcat-annotations-api`（内嵌容器）、`jackson-databind`（含 core / annotations，JSON）。IDEA / Maven 按 pom 解析；手写 `javac` 必须自己把它们放进 `-cp`。
@@ -87,6 +88,8 @@
 | `ValueInjectionTest` | `@Value` 默认值与类型转换、未解析的占位符原样保留、`@PostConstruct` |
 | `ConditionTest` | 假条件不进册子、`@ConditionalOnMissingBean` 从载体推导类型 |
 | `BeanMethodTest` | `@Bean` 名字取自方法名、参数按类型注入 |
+| `PrimaryTest` | 类上 / `@Bean` 方法上的 `@Primary`、一对多查找不被过滤、无主时抛并点名两个候选 |
+| `QualifierTest` | `@Qualifier` 过滤候选并压过 `@Primary`、名字不存在与类型不符两种出口 |
 | `EventTest` | 第 12 步广播、按事件类型过滤 |
 | `ProxyTransactionTest` | JDK 代理、begin/commit/rollback 顺序、字段里拿到的就是代理 |
 | `web/PathMatcherTest` | 字面量段 / 槽位 / 段数 / 具体度 |
@@ -98,7 +101,7 @@
 
 ### 准备数据库
 
-`Main` 走真实数据库，先建库建表：
+`demo.Main` 走真实数据库，先建库建表：
 
 ```sql
 CREATE DATABASE mini_spring DEFAULT CHARSET utf8mb4;
@@ -145,7 +148,7 @@ java -Dmini.db.url=jdbc:mysql://localhost:3306/mini_spring \
 java -cp "target/manual;mini-spring-boot/src/main/resources;$CP" com.mini.boot.demo.BootDemo
 ```
 
-`Main` 通过 `@Import` 引入了 `HandlerMapping`，它的方法签名里有 `HttpServletRequest`，
+`demo.Main` 通过 `@Import` 引入了 `HandlerMapping`，它的方法签名里有 `HttpServletRequest`，
 所以运行期 servlet-api 也得在 classpath 上（`$CP` 里已经包含）。
 IDEA 里对应 Run Configuration → Modify options → Add dependencies with "Provided" scope to classpath。
 
@@ -168,7 +171,7 @@ classpath 分隔符 Windows 是 `;`，Linux / macOS 是 `:`。
 ```
 @PostConstruct>>OrderService
 [event]：ContextRefreshedEvent ,listener@<hash>
-skip com.mini.spring.ApplicationListener<com.mini.spring.demo.OrderPlacedEvent> for ContextRefreshedEvent
+skip com.mini.spring.context.ApplicationListener<com.mini.spring.demo.OrderPlacedEvent> for ContextRefreshedEvent
 ---①：配方名单---
 [main, configurationClassPostProcessor, contextReadyListener, helloController, ...]
 ---②：测试循环依赖注入bean---
@@ -253,7 +256,7 @@ mini-spring/src/main/java/com/mini/spring/
 │   └── Ordered.java / OrderComparator.java
 │
 │  按能力分包
-├── annotation/       @Component / @Autowired / @Value / @Bean / @Conditional / @Import ...
+├── annotation/       @Component / @Autowired / @Value / @Bean / @Conditional / @Import / @Primary / @Qualifier ...
 ├── aop/              Pointcut / Advisor / AutoProxyCreator / MethodInterceptor / MethodInvocation
 ├── transaction/      @EnableTransactionManagement 及装配：点、面、拦截器、selector、registrar；
 │                     PlatformTransactionManager 接口断开 jdbc 与 transaction 的包环
@@ -304,7 +307,7 @@ mini-spring-boot/src/main/resources/META-INF/spring/
 | 内嵌 Tomcat（依赖 `tomcat-embed-core`） | 内嵌 Tomcat / Jetty / Undertow | 容器是第三方 jar，本实现负责造、开、关的接线 |
 | 只有 `${}` 占位符 | 还有 `#{}` 表达式 | 没有 SpEL |
 | 无 `@Configuration` / `proxyBeanMethods` | 有 | 需要字节码增强 |
-| 按类型取 bean 撞车直接抛异常 | `@Primary` / `@Qualifier` / 参数名仲裁 | 只到"抛 `NoUniqueBeanDefinitionException`"为止 |
+| 多候选只按 `@Primary` / `@Qualifier` 仲裁 | 还会拿字段名 / 参数名去撞 beanName | 名字这一档没有参与仲裁 |
 | 每次查询新建连接，没有连接池 | HikariCP / Tomcat JDBC Pool | 也没有 `@PreDestroy` 关池 |
 | 事务只有"加入当前事务"一种行为，嵌套调用直接抛 | 7 种传播行为 | `bindResource` 发现已绑定就抛 `IllegalStateException` |
 | 单例 + 同步事件广播 | 还有 prototype、`@Lazy`、异步、parent-child 容器 | 暂时没写 |
@@ -312,11 +315,12 @@ mini-spring-boot/src/main/resources/META-INF/spring/
 ## 状态
 
 已跑通：IoC 主干、AOP、事件、`@Bean`、`@Conditional`、`Environment` + `@Value`、
+同类型多候选仲裁（`@Primary` / `@Qualifier`）、
 `@Import` 三条分支（外加 `DeferredImportSelector` 延迟导入）、自动配置清单、内嵌 Tomcat 容器、
 JDBC（`DataSource` / `JdbcTemplate`）、声明式事务（线程绑定连接，回滚生效）、
 MVC 主干（`@RestController`  + 类级 `@RequestMapping`  + 方法级 Mapping(`@GetMapping`、`PostMapping`...等) `@RequestParam`+`@PathVariable`+`@RequestBody`三种参数解析，解参失败 400 / 路径未映射 404 / 方法抛异常 500）。
 
 构建：`./mvnw verify`。测试在 `mini-spring/src/test/java`，CI 见 `.github/workflows/build.yml`。
 
-未实现：`@Qualifier` / `@Primary` 仲裁、prototype 作用域、`@PreDestroy` 与 Bean 销毁、
+未实现：prototype 作用域、`@PreDestroy` 与 Bean 销毁、
 无接口类的代理、AspectJ 切点表达式、嵌套配置类、`@Bean("name")`、连接池、事务传播与嵌套事务。
